@@ -37,7 +37,10 @@ public class GameBoardController {
      * @param playerId The id of the player to kick out.
      */
     public void kickOut(int playerId) {
-
+        if(Objects.requireNonNull(this.gameBoard.getPlayer(playerId).getGameState()).getNumLives() == 0
+                && this.gameBoard.hasPlayer(this.gameBoard.getPlayer(playerId))){
+            this.gameBoard.getPlayers().remove(this.gameBoard.getPlayer(playerId));
+        }
     }
 
     /**
@@ -71,7 +74,7 @@ public class GameBoardController {
      * @return An instance of {@link MoveResult} representing the result of this action.
      */
     @Nullable
-    public MoveResult makeMove(@NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult makeMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
 
 
@@ -110,7 +113,7 @@ public class GameBoardController {
      *
      * @param prevMove The {@link MoveResult} object to revert.
      */
-    public void undoMove(@NotNull final MoveResult prevMove) {
+    public synchronized void undoMove(@NotNull final MoveResult prevMove) {
         // undo is not allow in multiplayer mode
         if (gameBoard.isMultiplayer()) {
             throw new IllegalCallerException();
@@ -147,7 +150,7 @@ public class GameBoardController {
      * moving.
      */
     @NotNull
-    public MoveResult tryMove(@NotNull final Position position, @NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult tryMove(@NotNull final Position position, @NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(position);
         Objects.requireNonNull(direction);
 

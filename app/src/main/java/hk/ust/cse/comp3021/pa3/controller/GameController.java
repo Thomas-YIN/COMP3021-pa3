@@ -5,10 +5,7 @@ import hk.ust.cse.comp3021.pa3.util.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Controller for {@link hk.ust.cse.comp3021.pa3.InertiaFxGame}.
@@ -112,7 +109,7 @@ public class GameController {
      * @param playerID  ID of the player to move.
      * @return An instance of {@link MoveResult} indicating the result of the action.
      */
-    public MoveResult processMove(@NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult processMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
 
         var result = this.getGameState(playerID).getGameBoardController().makeMove(direction, playerID);
@@ -177,6 +174,52 @@ public class GameController {
      */
     @Nullable
     public Player[] getWinners() {
-        throw new NotImplementedException();
+        if(!getGameState(getPlayers()[0].getId()).noGemsLeft())
+            return null;
+        else{
+            //No gems left on the board
+            /*
+            int numPlayers = this.getPlayers().length;
+            Player[] ws = new Player[numPlayers];
+            List<Player> winners = new ArrayList<>();
+            int high = 0;
+            for(int i=0; i<numPlayers; i++){
+                if(!this.getGameState(getPlayers()[i].getId()).hasLost() && this.getGameState(getPlayers()[i].getId()).getScore() > high){
+                    //This player survives
+                    high = this.getGameState(getPlayers()[i].getId()).getScore();
+                }
+            }
+            for(int i=0; i<numPlayers; i++){
+                if(this.getGameState(getPlayers()[i].getId()).getScore() == high)
+                    winners.add(this.getGameState(getPlayers()[i].getId()).getPlayer());
+            }
+            winners.toArray(ws);
+            return ws;
+
+             */
+            Player[] players = this.getPlayers();
+            int numPlayers = players.length;
+            int high = 0;
+            int numWinners = 0;
+            for(int i=0; i<numPlayers; i++){
+                if(!this.getGameState(players[i].getId()).hasLost() && this.getGameState(players[i].getId()).getScore() > high){
+                    //This player survives
+                    high = this.getGameState(players[i].getId()).getScore();
+                }
+            }
+            for(int i=0; i<numPlayers; i++){
+                if(this.getGameState(players[i].getId()).getScore() == high)
+                    numWinners++;
+            }
+            Player[] winners = new Player[numWinners];
+            int j=0;
+            for (Player player : players) {
+                if (this.getGameState(player.getId()).getScore() == high) {
+                    winners[j] = this.getGameState(player.getId()).getPlayer();
+                    j++;
+                }
+            }
+            return winners;
+        }
     }
 }
