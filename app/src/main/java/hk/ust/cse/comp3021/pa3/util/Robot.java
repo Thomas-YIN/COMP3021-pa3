@@ -19,6 +19,7 @@ public class Robot implements MoveDelegate {
         Random, Smart
     }
 
+    AtomicBoolean robotEnabled = new AtomicBoolean(false);
     /**
      * A generator to get the time interval before the robot makes the next move.
      */
@@ -70,6 +71,7 @@ public class Robot implements MoveDelegate {
     @Override
     public void startDelegation(@NotNull MoveProcessor processor) {
         this.stopDelegation();
+        robotEnabled.set(true);
         new Thread(() ->{
             while(true){
                 synchronized(this){
@@ -79,6 +81,9 @@ public class Robot implements MoveDelegate {
                       }catch (InterruptedException e){
                           e.printStackTrace();
                       }
+                      if(!robotEnabled.get()){
+                          break;
+                      }
                       if(this.strategy == Strategy.Random){
                           this.makeMoveRandomly(processor);
                       }else if(this.strategy == Strategy.Smart){
@@ -87,6 +92,7 @@ public class Robot implements MoveDelegate {
                   }
               }
             }).start();
+
         //return;
     }
 
@@ -96,10 +102,7 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void stopDelegation() {
-        Thread current = Thread.currentThread();
-        System.out.println(current.getName());
-        current.interrupt();
-        //System.exit(0);
+        robotEnabled.set(false);
     }
 
     private MoveResult tryMove(Direction direction) {
@@ -156,7 +159,33 @@ public class Robot implements MoveDelegate {
      * @param processor The processor to make movements.
      */
     private void makeMoveSmartly(MoveProcessor processor) {
-
+        var directions = new ArrayList<>(Arrays.asList(Direction.values()));
+        //Collections.shuffle(directions);
+        Direction aliveDirection = null;
+        Direction deadDirection = null;
+        Direction optimal = null;
+        int maxNumGems = 0;
+        for (var direction : directions) {
+            var result = tryMove(direction);
+            if (result instanceof MoveResult.Valid.Alive) {
+                int thisNumGems = ((MoveResult.Valid.Alive) result).collectedGems.size();
+                if(thisNumGems > maxNumGems){
+                    maxNumGems = thisNumGems;
+                    optimal = direction;
+                }else{
+                    aliveDirection = direction;
+                }
+            } else if (result instanceof MoveResult.Valid.Dead) {
+                deadDirection = direction;
+            }
+        }
+        if(optimal != null){
+            processor.move(optimal);
+        }else if (aliveDirection != null) {
+            processor.move(aliveDirection);
+        } else if (deadDirection != null) {
+            processor.move(deadDirection);
+        }
     }
 
 }
