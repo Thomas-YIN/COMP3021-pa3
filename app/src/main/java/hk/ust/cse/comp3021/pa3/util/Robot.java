@@ -93,7 +93,6 @@ public class Robot implements MoveDelegate {
                     }catch (InterruptedException e){
                         e.printStackTrace();
                     }
-
                     //If the robot is still running, make the move
                     if(this.strategy == Strategy.Random){
                         this.makeMoveRandomly(processor);

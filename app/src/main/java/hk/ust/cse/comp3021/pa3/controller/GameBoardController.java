@@ -36,14 +36,7 @@ public class GameBoardController {
      *
      * @param playerId The id of the player to kick out.
      */
-    public void kickOut(int playerId) {
-        /*
-        if(Objects.requireNonNull(this.gameBoard.getPlayer(playerId).getGameState()).getNumLives() == 0
-                && this.gameBoard.hasPlayer(this.gameBoard.getPlayer(playerId))){
-            this.gameBoard.getPlayers().remove(this.gameBoard.getPlayer(playerId));
-        }
-         */
-        //gameBoard.getPlayer(playerId).setOwner(null);
+    public synchronized void kickOut(int playerId) {
         Objects.requireNonNull(gameBoard.getPlayer(playerId).getOwner()).setEntity(null);
     }
 
