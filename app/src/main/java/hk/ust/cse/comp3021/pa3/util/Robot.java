@@ -19,7 +19,9 @@ public class Robot implements MoveDelegate {
         Random, Smart
     }
 
-    AtomicBoolean robotEnabled = new AtomicBoolean(false);
+    private final AtomicBoolean robotEnabled = new AtomicBoolean(false);
+    private static Direction lastDirection = null;
+    private static MoveResult lastResult = null;
     /**
      * A generator to get the time interval before the robot makes the next move.
      */
@@ -71,29 +73,36 @@ public class Robot implements MoveDelegate {
     @Override
     public void startDelegation(@NotNull MoveProcessor processor) {
         this.stopDelegation();
+        //Set the flag to be true
         robotEnabled.set(true);
-        new Thread(() ->{
+        //Create new thread
+        new Thread(() -> {
             while(true){
                 synchronized(this){
-                      var interval = timeIntervalGenerator.next();
-                      try{
-                          Thread.sleep(interval);
-                      }catch (InterruptedException e){
-                          e.printStackTrace();
-                      }
-                      if(!robotEnabled.get()){
-                          break;
-                      }
-                      if(this.strategy == Strategy.Random){
-                          this.makeMoveRandomly(processor);
-                      }else if(this.strategy == Strategy.Smart){
-                          this.makeMoveSmartly(processor);
-                      }
-                  }
-              }
-            }).start();
+                    notifyAll();
+                    var interval = timeIntervalGenerator.next();
+                    try{
+                        Thread.sleep(interval);
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                    //Check if the robot has been disabled
+                    try{
+                        while(!robotEnabled.get())
+                            wait();
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
 
-        //return;
+                    //If the robot is still running, make the move
+                    if(this.strategy == Strategy.Random){
+                        this.makeMoveRandomly(processor);
+                    }else if(this.strategy == Strategy.Smart){
+                        this.makeMoveSmartly(processor);
+                    }
+                }
+            }
+        }).start();
     }
 
     /**
@@ -144,6 +153,10 @@ public class Robot implements MoveDelegate {
         } else if (deadDirection != null) {
             processor.move(deadDirection);
         }
+        //Stop the thread if the robot has died
+        if(this.gameState.hasLost()){
+            stopDelegation();
+        }
     }
 
     /**
@@ -160,31 +173,66 @@ public class Robot implements MoveDelegate {
      */
     private void makeMoveSmartly(MoveProcessor processor) {
         var directions = new ArrayList<>(Arrays.asList(Direction.values()));
-        //Collections.shuffle(directions);
+
         Direction aliveDirection = null;
         Direction deadDirection = null;
-        Direction optimal = null;
+        Direction optimalDirection = null;
+        Direction invalidDirection = null;
+        Direction exclude = null;
+
         int maxNumGems = 0;
+        Collections.shuffle(directions);
+
+        if(lastDirection != null && !(lastResult instanceof MoveResult.Invalid)){
+            if (lastDirection.compareTo(Direction.UP) == 0){
+                exclude = Direction.DOWN;
+            }else if(lastDirection.compareTo(Direction.DOWN) == 0){
+                exclude = Direction.UP;
+            }else if(lastDirection.compareTo(Direction.LEFT) == 0){
+                exclude = Direction.RIGHT;
+            }else {
+                exclude = Direction.LEFT;
+            }
+        }
+
+        directions.remove(exclude);
         for (var direction : directions) {
             var result = tryMove(direction);
             if (result instanceof MoveResult.Valid.Alive) {
                 int thisNumGems = ((MoveResult.Valid.Alive) result).collectedGems.size();
                 if(thisNumGems > maxNumGems){
                     maxNumGems = thisNumGems;
-                    optimal = direction;
+                    optimalDirection = direction;
                 }else{
                     aliveDirection = direction;
                 }
+            } else if(result instanceof MoveResult.Invalid){
+                invalidDirection = direction;
             } else if (result instanceof MoveResult.Valid.Dead) {
                 deadDirection = direction;
             }
         }
-        if(optimal != null){
-            processor.move(optimal);
+        //Extra rule: do not go back to the same direction
+        if(optimalDirection != null){
+            lastDirection = optimalDirection;
+            lastResult = tryMove(optimalDirection);
+            processor.move(optimalDirection);
         }else if (aliveDirection != null) {
+            lastDirection = aliveDirection;
+            lastResult = tryMove(aliveDirection);
             processor.move(aliveDirection);
+        } else if (invalidDirection != null){
+            lastDirection = invalidDirection;
+            lastResult = tryMove(invalidDirection);
+            processor.move(invalidDirection);
         } else if (deadDirection != null) {
+            lastDirection = deadDirection;
+            lastResult = tryMove(deadDirection);
             processor.move(deadDirection);
+        }
+        //Stop the thread if the robot has died
+        if(this.gameState.hasLost()){
+            stopDelegation();
         }
     }
 

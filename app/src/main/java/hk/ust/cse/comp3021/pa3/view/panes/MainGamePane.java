@@ -106,7 +106,7 @@ public class MainGamePane extends VBox implements GameUIComponent {
      *
      * @param e The corresponding {@link MoveEvent}.
      */
-    private synchronized void gameMoveHandler(MoveEvent e) {
+    private void gameMoveHandler(MoveEvent e) {
         if (gameEnded) {
             return;
         }

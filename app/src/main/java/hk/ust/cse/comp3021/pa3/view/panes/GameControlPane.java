@@ -79,11 +79,11 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      */
     private void move(@NotNull Direction direction) {
         Platform.runLater(()->{
-                    var result = this.gameController.processMove(direction, player.getId());
-                    if (result != null) {
-                        this.moveEvent.get().handle(new MoveEvent(result, player.getId()));
-                    }
-                });
+            var result = this.gameController.processMove(direction, player.getId());
+            if (result != null) {
+                this.moveEvent.get().handle(new MoveEvent(result, player.getId()));
+            }
+        });
     }
 
     /**
@@ -118,11 +118,10 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      * should be enabled to allow control from GUI, i.e., call {@link GameControlPane#enable()}.
      */
     public void revokeControl() {
-        if(this.moveDelegate == null) {
-            throw new NullPointerException();
+        if(this.moveDelegate != null) {
+            this.moveDelegate.stopDelegation();
+            this.enable();
         }
-        this.moveDelegate.stopDelegation();
-        this.enable();
     }
 
     /**

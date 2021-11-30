@@ -23,6 +23,7 @@ public class PlayerPane extends VBox implements GameUIComponent {
      * The id of the player.
      */
     private final Label playerID;
+    //private final int id;
 
     /**
      * A toggle button that controls whether to delegate the player control to a {@link Robot} instance.
@@ -41,6 +42,7 @@ public class PlayerPane extends VBox implements GameUIComponent {
      * @param gameState      The game state that belongs to the player corresponding to this instance.
      * @param allowUndo      Whether the player is allowed to undo movements.
      */
+
     PlayerPane(GameController gameController, GameState gameState, boolean allowUndo) {
         super();
         this.playerID = new Label(String.format("Player %d", gameState.getPlayer().getId()));
@@ -48,6 +50,7 @@ public class PlayerPane extends VBox implements GameUIComponent {
         this.controlPane = new GameControlPane(gameController, gameState.getPlayer(), allowUndo);
         this.robotButton = new ToggleButton("Robot Disabled");
         this.statisticsPane = new GameStatisticsPane(gameState);
+        //this.id = gameState.getPlayer().getId();
     }
 
     /**
@@ -72,6 +75,11 @@ public class PlayerPane extends VBox implements GameUIComponent {
     private void robotButtonAction(Event e) {
         if (robotButton.isSelected()) {
             robotButton.setText("Robot Enabled");
+            /*
+            var strategy = Robot.Strategy.Smart;
+            if(this.id % 2 == 1)
+                strategy = Robot.Strategy.Random;
+             */
             controlPane.delegateControl(new Robot(getGameState()));
         } else {
             controlPane.revokeControl();

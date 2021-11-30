@@ -174,42 +174,34 @@ public class GameController {
      */
     @Nullable
     public Player[] getWinners() {
-        if(!getGameState(getPlayers()[0].getId()).noGemsLeft())
-            return null;
-        else{
-            //No gems left on the board
-            /*
-            int numPlayers = this.getPlayers().length;
-            Player[] ws = new Player[numPlayers];
-            List<Player> winners = new ArrayList<>();
-            int high = 0;
-            for(int i=0; i<numPlayers; i++){
-                if(!this.getGameState(getPlayers()[i].getId()).hasLost() && this.getGameState(getPlayers()[i].getId()).getScore() > high){
-                    //This player survives
-                    high = this.getGameState(getPlayers()[i].getId()).getScore();
+        Player[] players = this.getPlayers();
+        if(!getGameState(getPlayers()[0].getId()).noGemsLeft()){
+            boolean allPlayerDead = true;
+            //Check if every player has died
+            for (Player player : players) {
+                if (!this.getGameState(player.getId()).hasLost()){
+                    allPlayerDead = false;
                 }
             }
-            for(int i=0; i<numPlayers; i++){
-                if(this.getGameState(getPlayers()[i].getId()).getScore() == high)
-                    winners.add(this.getGameState(getPlayers()[i].getId()).getPlayer());
+            if(allPlayerDead){
+                return new Player[0];
+            }else{
+                return null;
             }
-            winners.toArray(ws);
-            return ws;
-
-             */
-            Player[] players = this.getPlayers();
-            int numPlayers = players.length;
+        } else{
+            //No gems left on the board
             int high = 0;
             int numWinners = 0;
-            for(int i=0; i<numPlayers; i++){
-                if(!this.getGameState(players[i].getId()).hasLost() && this.getGameState(players[i].getId()).getScore() > high){
+            for (Player player : players) {
+                if (!this.getGameState(player.getId()).hasLost() && this.getGameState(player.getId()).getScore() > high) {
                     //This player survives
-                    high = this.getGameState(players[i].getId()).getScore();
+                    high = this.getGameState(player.getId()).getScore();
                 }
             }
-            for(int i=0; i<numPlayers; i++){
-                if(this.getGameState(players[i].getId()).getScore() == high)
+            for (Player player : players) {
+                if (this.getGameState(player.getId()).getScore() == high) {
                     numWinners++;
+                }
             }
             Player[] winners = new Player[numWinners];
             int j=0;
