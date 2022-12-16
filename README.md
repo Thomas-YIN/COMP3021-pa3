@@ -175,27 +175,3 @@ To help you with the different tasks offered by Gradle, we have bundled some run
 
 Note that for testing, there is an option for Gradle and an option for JUnit. While usually we would use the Gradle version, a bug in IntelliJ causes the test panel to not show up when testing using Gradle. Therefore, we suggest using the JUnit version of the test configurations instead.
 
-## Submission
-
-You should submit a ZIP file containing the following:
-
-- This Java project. Please keep the original file structure.
-- A `github-url.txt` file containing the URL of your private repository. We will ask you to add the TAs' accounts as collaborators soon.
-
-You need to submit your ZIP file to [CASS](https://cssystem.cse.ust.hk/UGuides/cass/index.html). The deadline for this assignment is **November 30, 2021, 23:59**.
-
-## Grading Scheme
-
-|  | **Percentage** | **Notes** |
-| --- | --- | --- |
-| Keep your GitHub repository private | 5% | You must keep your repository **private** at all times. |
-| Commit at least 3 times in different days | 5% | You should commit three times during different days in your repository. |
-| Code Style | 10% | You get 10% by default, and every 5 warnings from CheckStyle deducts 1%. |
-| Provided Tests | 15% | `(# of passing tests / # of provided tests) * 15%` |
-| Hidden Tests | 65% | `(# of passing tests / # of hidden tests) * 65%` |
-
-### Plagiarism
-
-We trust that you are familiar with HKUST's Honor Code. If not, refer to
-[this page](https://course.cse.ust.hk/comp3021/#honorcode).
-
